@@ -1,10 +1,11 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: GPL-2.0
 /*
  *  Copyright (c) 2025 Aura Cichoń <vddcore@outlook.com>
  */
 
 /dts-v1/;
 #include <dt-bindings/input/input.h>
+#include <dt-bindings/leds/common.h>
 #include "rk3326.dtsi"
 
 / {
@@ -47,7 +48,7 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&led_pin>;
 
-		red_green_led: led-0 {
+		tri_state_led: led-0 {
 			color = <LED_COLOR_ID_RED>;
 			gpios = <&gpio2 RK_PB5 GPIO_ACTIVE_HIGH>;
 			function = LED_FUNCTION_CHARGING;
