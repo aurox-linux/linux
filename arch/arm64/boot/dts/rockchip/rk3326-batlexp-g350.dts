@@ -1,9 +1,10 @@
-// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+// SPDX-License-Identifier: GPL-2.0-or-later
 /*
  *  Copyright (c) 2025 Aura Cichoń <vddcore@outlook.com>
  */
 
 /dts-v1/;
+#include <dt-bindings/input/input.h>
 #include "rk3326.dtsi"
 
 / {
@@ -41,6 +42,211 @@
 		voltage-min-design-microvolt = <3400000>;
 	};
 
+	gpio_led: gpio-leds {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&led_pin>;
+
+		red_green_led: led-0 {
+			color = <LED_COLOR_ID_RED>;
+			gpios = <&gpio2 RK_PB5 GPIO_ACTIVE_HIGH>;
+			function = LED_FUNCTION_CHARGING;
+		};
+	};
+
+	joystick_mux_controller: joystick-mux-controller {
+		compatible = "gpio-mux";
+		pinctrl = <&mux_en_pins>;
+		#mux-control-cells = <0>;
+
+		mux-gpios = 
+			<&gpio3 RK_PB0 GPIO_ACTIVE_LOW>,
+			<&gpio3 RK_PB3 GPIO_ACTIVE_LOW>;
+	};
+
+	joystick_mux: joystick-mux {
+		compatible = "io-channel-mux";
+		io-channels = <&saradc 1>;
+		io-channel-names = "parent";
+		#io-channel-cells = <1>;
+
+		mux-controls = <&joystick_mux_controller>;
+		channels = "0", "1", "2", "3";
+	};
+
+	joystick: joystick {
+		compatible = "adc-joystick";
+		
+		io-channels = 
+			<&joystick_mux 0>,
+			<&joystick_mux 1>,
+			<&joystick_mux 2>,
+			<&joystick_mux 3>;
+
+		poll-interval = <60>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		axis@0 {
+			reg = <0>;
+			abs-flat = <10>;
+			abs-fuzz = <10>;
+			abs-range = <1024 0>;
+			linux,code = <ABS_X>;
+		};
+
+		axis@1 {
+			reg = <1>;
+			abs-flat = <10>;
+			abs-fuzz = <10>;
+			abs-range = <1024 0>;
+			linux,code = <ABS_Y>;
+		};
+
+		axis@2 {
+			reg = <3>;
+			abs-flat = <10>;
+			abs-fuzz = <10>;
+			abs-range = <1024 0>;
+			linux,code = <ABS_RX>;
+		};
+
+		axis@3 {
+			reg = <2>;
+			abs-flat = <10>;
+			abs-fuzz = <10>;
+			abs-range = <0 1024>;
+			linux,code = <ABS_RY>;
+		};
+	};
+
+	keys_vol: keys-vol {
+		compatible = "gpio-keys";
+		autorepeat;
+		pinctrl-0 = <&btn_pins_vol>;
+		pinctrl-names = "default";
+
+		button-volume-up {
+			gpios = <&gpio2 RK_PA0 GPIO_ACTIVE_LOW>;
+			label = "BTN_VOLUP";
+			linux,code = <KEY_VOLUMEUP>;
+		};
+
+		button-vol-down {
+			gpios = <&gpio2 RK_PA1 GPIO_ACTIVE_LOW>;
+			label = "BTN_VOLDOWN";
+			linux,code = <KEY_VOLUMEDOWN>;
+		};
+	};
+
+	keys_gamepad: keys-gamepad {
+		compatible = "gpio-keys";
+		pinctrl-0 = <&btn_pins_gamepad>;
+		pinctrl-names = "default";
+
+		button-dpad-up {
+			gpios = <&gpio1 RK_PB4 GPIO_ACTIVE_LOW>;
+			label = "BTN-DPAD-UP";
+			linux,code = <BTN_DPAD_UP>;
+		};
+
+		button-dpad-down {
+			gpios = <&gpio1 RK_PB5 GPIO_ACTIVE_LOW>;
+			label = "BTN-DPAD-DOWN";
+			linux,code = <BTN_DPAD_DOWN>;
+		};
+
+		button-dpad-left {
+			gpios = <&gpio1 RK_PB6 GPIO_ACTIVE_LOW>;
+			label = "BTN-DPAD-LEFT";
+			linux,code = <BTN_DPAD_LEFT>;
+		};
+
+		button-dpad-right {
+			gpios = <&gpio1 RK_PB7 GPIO_ACTIVE_LOW>;
+			label = "BTN-DPAD-RIGHT";
+			linux,code = <BTN_DPAD_RIGHT>;
+		};
+
+		button-east {
+			gpios = <&gpio1 RK_PA2 GPIO_ACTIVE_LOW>;
+			label = "BTN-EAST";
+			linux,code = <BTN_EAST>;
+		};
+
+		button-south {
+			gpios = <&gpio1 RK_PA5 GPIO_ACTIVE_LOW>;
+			label = "BTN-SOUTH";
+			linux,code = <BTN_SOUTH>;
+		};
+
+		button-west {
+			gpios = <&gpio1 RK_PA6 GPIO_ACTIVE_LOW>;
+			label = "BTN-WEST";
+			linux,code = <BTN_WEST>;
+		};
+
+		button-north {
+			gpios = <&gpio1 RK_PA7 GPIO_ACTIVE_LOW>;
+			label = "BTN-NORTH";
+			linux,code = <BTN_NORTH>;
+		};
+
+		button-mode {
+			gpios = <&gpio3 RK_PC5 GPIO_ACTIVE_LOW>;
+			label = "BTN-MODE";
+			linux,code = <BTN_TRIGGER_HAPPY5>;
+		};
+
+		button-select {
+			gpios = <&gpio3 RK_PB1 GPIO_ACTIVE_LOW>;
+			label = "BTN-SELECT";
+			linux,code = <BTN_TRIGGER_HAPPY1>;
+		};
+
+		button-start {
+			gpios = <&gpio3 RK_PB4 GPIO_ACTIVE_LOW>;
+			label = "BTN-START";
+			linux,code = <BTN_TRIGGER_HAPPY2>;
+		};
+
+		button-l1 {
+			gpios = <&gpio2 RK_PA6 GPIO_ACTIVE_LOW>;
+			label = "BTN-L1";
+			linux,code = <BTN_TL>;
+		};
+
+		button-r1 {
+			gpios = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>;
+			label = "BTN-R1";
+			linux,code = <BTN_TR>;
+		};
+
+		button-l2 {
+			gpios = <&gpio3 RK_PB2 GPIO_ACTIVE_LOW>;
+			label = "BTN-L2";
+			linux,code = <BTN_TL2>;
+		};
+
+		button-r2 {
+			gpios = <&gpio3 RK_PB7 GPIO_ACTIVE_LOW>;
+			label = "BTN-R2";
+			linux,code = <BTN_TR2>;
+		};
+
+		button-l3 {
+			gpios = <&gpio2 RK_PA2 GPIO_ACTIVE_LOW>;
+			label = "BTN-L3";
+			linux,code = <BTN_TRIGGER_HAPPY3>;
+		};
+
+		button-r3 {
+			gpios = <&gpio2 RK_PA3 GPIO_ACTIVE_LOW>;
+			label = "BTN-R3";
+			linux,code = <BTN_TRIGGER_HAPPY4>;
+		};
+	};
+
 	rk817-sound {
 		compatible = "simple-audio-card";
 		simple-audio-card,name = "rk817_int";
@@ -66,12 +272,28 @@
 		};
 	};
 
-	vccsys: regulator-vccsys {
+	vcc_host: regulator-vcc-host {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_host";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+		vin-supply = <&vcc_sys>;
+	};
+
+	vcc_sys: regulator-vcc-sys {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc3v8_sys";
 		regulator-always-on;
 		regulator-min-microvolt = <3800000>;
 		regulator-max-microvolt = <3800000>;
+	};
+
+	vibrator: pwm-vibrator {
+		compatible = "pwm-vibrator";
+		pwms = <&pwm0 0 1000000000 0>;
+		pwm-names = "enable";
+		vcc-supply = <&vcc_host>;
 	};
 };
 
@@ -169,14 +391,14 @@
 		#clock-cells = <1>;
 		#sound-dai-cells = <0>;
 
-		vcc1-supply = <&vccsys>;
-		vcc2-supply = <&vccsys>;
-		vcc3-supply = <&vccsys>;
-		vcc4-supply = <&vccsys>;
-		vcc5-supply = <&vccsys>;
-		vcc6-supply = <&vccsys>;
-		vcc7-supply = <&vccsys>;
-		vcc8-supply = <&vccsys>;
+		vcc1-supply = <&vcc_sys>;
+		vcc2-supply = <&vcc_sys>;
+		vcc3-supply = <&vcc_sys>;
+		vcc4-supply = <&vcc_sys>;
+		vcc5-supply = <&vcc_sys>;
+		vcc6-supply = <&vcc_sys>;
+		vcc7-supply = <&vcc_sys>;
+		vcc8-supply = <&vcc_sys>;
 		vcc9-supply = <&dcdc_boost>;
 
 		pwrkey {
@@ -466,7 +688,7 @@
 
 &pinctrl {
 	btns {
-		btn_pins: btn-pins {
+		btn_pins_gamepad: btn-pins-gamepad {
 			rockchip,pins = 
 				<1 RK_PB4 RK_FUNC_GPIO &pcfg_pull_up>,
 				<1 RK_PB5 RK_FUNC_GPIO &pcfg_pull_up>,
@@ -476,8 +698,6 @@
 				<1 RK_PA5 RK_FUNC_GPIO &pcfg_pull_up>,
 				<1 RK_PA6 RK_FUNC_GPIO &pcfg_pull_up>,
 				<1 RK_PA7 RK_FUNC_GPIO &pcfg_pull_up>,
-				<2 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>,
-				<2 RK_PA1 RK_FUNC_GPIO &pcfg_pull_up>,
 				<2 RK_PA2 RK_FUNC_GPIO &pcfg_pull_up>,
 				<2 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>,
 				<2 RK_PA4 RK_FUNC_GPIO &pcfg_pull_up>,
@@ -490,13 +710,25 @@
 				<3 RK_PB7 RK_FUNC_GPIO &pcfg_pull_up>,
 				<3 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
+
+		btn_pins_vol: btn-pins-vol {
+			rockchip,pins = 
+					<2 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>,
+					<2 RK_PA1 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
+	joystick {
+		mux_en_pins: mux-pins {
+			rockchip,pins = <3 RK_PB5 RK_FUNC_GPIO &pcfg_output_low>;
+		};
 	};
 
 	leds {
-		led-pins {
-			rockchip,pins = <0 RK_PC1 RK_FUNC_GPIO &pcfg_pull_none>;
-		}
-	}
+		led_pin: led-pin {
+			rockchip,pins = <2 RK_PB5 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
 
 	pmic {
 		pmic_int: pmic-int {
@@ -505,15 +737,15 @@
 				<0 RK_PB3 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 
-		soc_slppin_gpio: soc_slppin_gpio {
+		soc_slppin_gpio: soc-slppin-gpio {
 			rockchip,pins = <0 RK_PA4 RK_FUNC_GPIO &pcfg_output_low>;
 		};
 
-		soc_slppin_rst: soc_slppin_rst {
+		soc_slppin_rst: soc-slppin-rst {
 			rockchip,pins = <0 RK_PA4 2 &pcfg_pull_none>;
 		};
 
-		soc_slppin_slp: soc_slppin_slp {
+		soc_slppin_slp: soc-slppin-slp {
 			rockchip,pins = <0 RK_PA4 1 &pcfg_pull_none>;
 		};
 	};
