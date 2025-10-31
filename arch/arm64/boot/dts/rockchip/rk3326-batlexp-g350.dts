@@ -657,13 +657,14 @@
 	u2phy_host: host-port {
 		status = "okay";
 	};
-
-	u2phy_otg: otg-port {
-		status = "disabled";
-	};
 };
 
 &usb20_otg {
+	dr_mode = "peripheral";
+	
+	usb-role-switch;
+	role-switch-default-mode = "peripheral";
+
 	status = "okay";
 };
 
